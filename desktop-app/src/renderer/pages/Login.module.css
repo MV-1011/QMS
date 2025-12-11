@@ -1,0 +1,196 @@
+/* Login Container */
+.loginContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, var(--primary-600) 0%, var(--primary-900) 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Background decorative elements */
+.loginContainer::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Cpath d='M50 10 L50 40 M35 25 L65 25' stroke='rgba(255,255,255,0.05)' stroke-width='4' fill='none' stroke-linecap='round'/%3E%3Ccircle cx='50' cy='50' r='20' stroke='rgba(255,255,255,0.03)' stroke-width='2' fill='none'/%3E%3C/svg%3E");
+  background-size: 150px 150px;
+  animation: float 60s linear infinite;
+  pointer-events: none;
+}
+
+.loginContainer::after {
+  content: '';
+  position: absolute;
+  bottom: -100px;
+  right: -100px;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+@keyframes float {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  100% {
+    transform: translate(-50px, -50px) rotate(10deg);
+  }
+}
+
+/* Large pharmacy cross watermark */
+.backgroundLogo {
+  position: absolute;
+  top: 50%;
+  left: 15%;
+  transform: translateY(-50%);
+  opacity: 0.06;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.backgroundLogo svg {
+  width: 300px;
+  height: 300px;
+}
+
+/* Login Box */
+.loginBox {
+  background: var(--bg-primary);
+  padding: var(--space-10);
+  border-radius: var(--radius-2xl);
+  box-shadow: var(--shadow-xl), 0 0 60px rgba(0, 0, 0, 0.2);
+  width: 100%;
+  max-width: 420px;
+  position: relative;
+  z-index: 1;
+  animation: slideUp var(--transition-slow) ease-out;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: var(--space-8);
+}
+
+.logo {
+  max-width: 160px;
+  height: auto;
+  margin-bottom: var(--space-6);
+}
+
+.header h1 {
+  color: var(--primary-600);
+  margin-bottom: var(--space-2);
+  font-size: var(--text-2xl);
+  font-weight: var(--font-bold);
+  letter-spacing: -0.02em;
+}
+
+.header h2 {
+  font-size: var(--text-base);
+  color: var(--text-tertiary);
+  font-weight: var(--font-normal);
+  margin: 0;
+}
+
+/* Form Styles */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.formGroup label {
+  font-weight: var(--font-medium);
+  font-size: var(--text-sm);
+  color: var(--text-primary);
+}
+
+.formGroup input {
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-md);
+  font-size: var(--text-base);
+  transition: all var(--transition-fast);
+  background: var(--bg-primary);
+}
+
+.formGroup input:focus {
+  outline: none;
+  border-color: var(--primary-500);
+  box-shadow: 0 0 0 3px var(--primary-100);
+}
+
+.formGroup input:disabled {
+  background-color: var(--bg-tertiary);
+  color: var(--text-tertiary);
+  cursor: not-allowed;
+}
+
+/* Error Message */
+.error {
+  padding: var(--space-3) var(--space-4);
+  background-color: var(--error-light);
+  border: 1px solid #fecaca;
+  border-radius: var(--radius-md);
+  color: var(--error-color);
+  font-size: var(--text-sm);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* Submit Button */
+.submitBtn {
+  padding: var(--space-3) var(--space-5);
+  background: linear-gradient(135deg, var(--primary-600) 0%, var(--primary-700) 100%);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: var(--text-base);
+  font-weight: var(--font-semibold);
+  transition: all var(--transition-fast);
+  cursor: pointer;
+  margin-top: var(--space-2);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+.submitBtn:hover:not(:disabled) {
+  background: linear-gradient(135deg, var(--primary-700) 0%, var(--primary-800) 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.4);
+}
+
+.submitBtn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.submitBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Footer */
+.footer {
+  margin-top: var(--space-6);
+  text-align: center;
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--border-light);
+}
