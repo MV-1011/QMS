@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { RefreshCw } from 'lucide-react';
 import { apiService } from '../../services/api';
+import PageHeader from '../../components/PageHeader';
 import styles from './ChangeControlList.module.css';
 
 interface ChangeControl {
@@ -54,7 +56,11 @@ const CHANGE_TYPES = [
   'Emergency Repair',
 ];
 
-const ChangeControlList: React.FC = () => {
+interface ChangeControlListProps {
+  readOnly?: boolean;
+}
+
+const ChangeControlList: React.FC<ChangeControlListProps> = ({ readOnly = false }) => {
   const [changeControls, setChangeControls] = useState<ChangeControl[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -359,14 +365,16 @@ const ChangeControlList: React.FC = () => {
             ← Back to List
           </button>
           <h2>{selectedCC.changeNumber}</h2>
-          <div className={styles.detailsActions}>
-            <button className={styles.btnSecondary} onClick={() => handleEdit(selectedCC)}>
-              Edit
-            </button>
-            <button className={styles.btnDanger} onClick={() => handleDelete(selectedCC._id)}>
-              Delete
-            </button>
-          </div>
+          {!readOnly && (
+            <div className={styles.detailsActions}>
+              <button className={styles.btnSecondary} onClick={() => handleEdit(selectedCC)}>
+                Edit
+              </button>
+              <button className={styles.btnDanger} onClick={() => handleDelete(selectedCC._id)}>
+                Delete
+              </button>
+            </div>
+          )}
         </div>
 
         <div className={styles.detailsCard}>
@@ -427,21 +435,23 @@ const ChangeControlList: React.FC = () => {
             </div>
           </div>
 
-          <div className={styles.statusSection}>
-            <h4>Update Status</h4>
-            <div className={styles.statusButtons}>
-              {['initiated', 'assessment', 'approval_pending', 'approved', 'implementation', 'verification', 'completed', 'rejected'].map(status => (
-                <button
-                  key={status}
-                  className={`${styles.statusBtn} ${selectedCC.status === status ? styles.statusBtnActive : ''}`}
-                  onClick={() => handleStatusChange(selectedCC, status)}
-                  disabled={selectedCC.status === status}
-                >
-                  {status.replace('_', ' ')}
-                </button>
-              ))}
+          {!readOnly && (
+            <div className={styles.statusSection}>
+              <h4>Update Status</h4>
+              <div className={styles.statusButtons}>
+                {['initiated', 'assessment', 'approval_pending', 'approved', 'implementation', 'verification', 'completed', 'rejected'].map(status => (
+                  <button
+                    key={status}
+                    className={`${styles.statusBtn} ${selectedCC.status === status ? styles.statusBtnActive : ''}`}
+                    onClick={() => handleStatusChange(selectedCC, status)}
+                    disabled={selectedCC.status === status}
+                  >
+                    {status.replace('_', ' ')}
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
     );
@@ -450,15 +460,13 @@ const ChangeControlList: React.FC = () => {
   // List view
   return (
     <div className={styles.container}>
-      <div className={styles.header}>
-        <div className={styles.headerLeft}>
-          <h2>Change Control</h2>
-          <p className={styles.subtitle}>Manage changes to processes, systems, and documents</p>
-        </div>
-        <button className={styles.btnPrimary} onClick={handleCreate}>
-          + New Change Control
-        </button>
-      </div>
+      <PageHeader icon={<RefreshCw size={24} />} title="Change Control" subtitle="Manage changes to processes, systems, and documents">
+        {!readOnly && (
+          <button className={styles.btnPrimary} onClick={handleCreate}>
+            + New Change Control
+          </button>
+        )}
+      </PageHeader>
 
       <div className={styles.filters}>
         <div className={styles.searchBox}>
@@ -534,9 +542,11 @@ const ChangeControlList: React.FC = () => {
           {filteredChangeControls.length === 0 ? (
             <div className={styles.empty}>
               <p>No change controls found</p>
-              <button className={styles.btnPrimary} onClick={handleCreate}>
-                Create your first change control
-              </button>
+              {!readOnly && (
+                <button className={styles.btnPrimary} onClick={handleCreate}>
+                  Create your first change control
+                </button>
+              )}
             </div>
           ) : (
             <div className={styles.tableContainer}>
@@ -591,20 +601,24 @@ const ChangeControlList: React.FC = () => {
                           >
                             👁️
                           </button>
-                          <button
-                            className={styles.btnAction}
-                            onClick={() => handleEdit(cc)}
-                            title="Edit"
-                          >
-                            ✏️
-                          </button>
-                          <button
-                            className={styles.btnAction}
-                            onClick={() => handleDelete(cc._id)}
-                            title="Delete"
-                          >
-                            🗑️
-                          </button>
+                          {!readOnly && (
+                            <>
+                              <button
+                                className={styles.btnAction}
+                                onClick={() => handleEdit(cc)}
+                                title="Edit"
+                              >
+                                ✏️
+                              </button>
+                              <button
+                                className={styles.btnAction}
+                                onClick={() => handleDelete(cc._id)}
+                                title="Delete"
+                              >
+                                🗑️
+                              </button>
+                            </>
+                          )}
                         </div>
                       </td>
                     </tr>

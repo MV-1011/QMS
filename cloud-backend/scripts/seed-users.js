@@ -117,7 +117,24 @@ async function seedUsers() {
     }
 
     const tenantId = tenant._id;
-    const passwordHash = await bcrypt.hash('password123', 10);
+
+    // Create unique passwords for each role
+    const passwords = {
+      admin: 'Admin@123',
+      qa_manager: 'QaManager@123',
+      pharmacist: 'Pharmacist@123',
+      technician: 'Technician@123',
+      trainee: 'Trainee@123',
+    };
+
+    // Hash all passwords
+    const passwordHashes = {
+      admin: await bcrypt.hash(passwords.admin, 10),
+      qa_manager: await bcrypt.hash(passwords.qa_manager, 10),
+      pharmacist: await bcrypt.hash(passwords.pharmacist, 10),
+      technician: await bcrypt.hash(passwords.technician, 10),
+      trainee: await bcrypt.hash(passwords.trainee, 10),
+    };
 
     // Clear existing users for this tenant
     console.log('🧹 Clearing existing users...');
@@ -130,7 +147,8 @@ async function seedUsers() {
       {
         tenantId,
         email: 'admin@abcpharmacy.com',
-        passwordHash,
+        passwordHash: passwordHashes.admin,
+        password: passwords.admin,
         firstName: 'John',
         lastName: 'Administrator',
         role: 'admin',
@@ -145,7 +163,8 @@ async function seedUsers() {
       {
         tenantId,
         email: 'qa.manager@abcpharmacy.com',
-        passwordHash,
+        passwordHash: passwordHashes.qa_manager,
+        password: passwords.qa_manager,
         firstName: 'Sarah',
         lastName: 'Johnson',
         role: 'qa_manager',
@@ -160,7 +179,8 @@ async function seedUsers() {
       {
         tenantId,
         email: 'pharmacist@abcpharmacy.com',
-        passwordHash,
+        passwordHash: passwordHashes.pharmacist,
+        password: passwords.pharmacist,
         firstName: 'Michael',
         lastName: 'Chen',
         role: 'pharmacist',
@@ -175,7 +195,8 @@ async function seedUsers() {
       {
         tenantId,
         email: 'technician@abcpharmacy.com',
-        passwordHash,
+        passwordHash: passwordHashes.technician,
+        password: passwords.technician,
         firstName: 'Emily',
         lastName: 'Davis',
         role: 'technician',
@@ -190,7 +211,8 @@ async function seedUsers() {
       {
         tenantId,
         email: 'trainee@abcpharmacy.com',
-        passwordHash,
+        passwordHash: passwordHashes.trainee,
+        password: passwords.trainee,
         firstName: 'Alex',
         lastName: 'Wilson',
         role: 'trainee',
@@ -214,7 +236,7 @@ async function seedUsers() {
     users.forEach((user, index) => {
       console.log(`  ${index + 1}. ${user.firstName} ${user.lastName}`);
       console.log(`     📧 Email: ${user.email}`);
-      console.log(`     🔑 Password: password123`);
+      console.log(`     🔑 Password: ${user.password}`);
       console.log(`     👤 Role: ${user.role}`);
       console.log(`     🏷️  Department: ${user.department}`);
       console.log(`     💼 Job Title: ${user.jobTitle}`);

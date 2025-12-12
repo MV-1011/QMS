@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { FileText } from 'lucide-react';
 import { apiService } from '../../services/api';
 import { useAuth } from '../../services/AuthContext';
 import DocumentForm from './DocumentForm';
 import DocumentViewer from './DocumentViewer';
+import PageHeader from '../../components/PageHeader';
 import styles from './DocumentsList.module.css';
 
 interface Document {
@@ -19,7 +21,11 @@ interface Document {
   };
 }
 
-const DocumentsList: React.FC = () => {
+interface DocumentsListProps {
+  readOnly?: boolean;
+}
+
+const DocumentsList: React.FC<DocumentsListProps> = ({ readOnly = false }) => {
   useAuth(); // Auth context for access control
   const [documents, setDocuments] = useState<Document[]>([]);
   const [loading, setLoading] = useState(true);
@@ -146,15 +152,13 @@ const DocumentsList: React.FC = () => {
 
   return (
     <div className={styles.container}>
-      <div className={styles.header}>
-        <div className={styles.headerLeft}>
-          <h2>Document Control</h2>
-          <p className={styles.subtitle}>Manage SOPs, policies, forms, and protocols</p>
-        </div>
-        <button className={styles.btnPrimary} onClick={handleCreate}>
-          + New Document
-        </button>
-      </div>
+      <PageHeader icon={<FileText size={24} />} title="Document Control" subtitle="Manage SOPs, policies, forms, and protocols">
+        {!readOnly && (
+          <button className={styles.btnPrimary} onClick={handleCreate}>
+            + New Document
+          </button>
+        )}
+      </PageHeader>
 
       <div className={styles.filters}>
         <div className={styles.searchBox}>
@@ -228,9 +232,11 @@ const DocumentsList: React.FC = () => {
           {filteredDocuments.length === 0 ? (
             <div className={styles.empty}>
               <p>No documents found</p>
-              <button className={styles.btnSecondary} onClick={handleCreate}>
-                Create your first document
-              </button>
+              {!readOnly && (
+                <button className={styles.btnSecondary} onClick={handleCreate}>
+                  Create your first document
+                </button>
+              )}
             </div>
           ) : (
             <div className={styles.tableContainer}>
@@ -279,20 +285,24 @@ const DocumentsList: React.FC = () => {
                           >
                             👁️
                           </button>
-                          <button
-                            className={styles.btnAction}
-                            onClick={() => handleEdit(doc)}
-                            title="Edit"
-                          >
-                            ✏️
-                          </button>
-                          <button
-                            className={styles.btnAction}
-                            onClick={() => handleDelete(doc._id)}
-                            title="Delete"
-                          >
-                            🗑️
-                          </button>
+                          {!readOnly && (
+                            <>
+                              <button
+                                className={styles.btnAction}
+                                onClick={() => handleEdit(doc)}
+                                title="Edit"
+                              >
+                                ✏️
+                              </button>
+                              <button
+                                className={styles.btnAction}
+                                onClick={() => handleDelete(doc._id)}
+                                title="Delete"
+                              >
+                                🗑️
+                              </button>
+                            </>
+                          )}
                         </div>
                       </td>
                     </tr>

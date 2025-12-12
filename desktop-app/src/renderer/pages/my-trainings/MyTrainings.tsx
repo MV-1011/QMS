@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { GraduationCap } from 'lucide-react';
 import apiService from '../../services/api';
 import { useNavigation } from '../../services/NavigationContext';
+import PageHeader from '../../components/PageHeader';
 import styles from './MyTrainings.module.css';
 
 interface Assignment {
@@ -889,8 +891,7 @@ const MyTrainings: React.FC = () => {
 
   return (
     <div className={styles.container}>
-      <header className={styles.header}>
-        <h1>My Trainings</h1>
+      <PageHeader icon={<GraduationCap size={24} />} title="My Trainings">
         <div className={styles.filters}>
           <button
             className={`${styles.filterBtn} ${filter === 'all' ? styles.active : ''}`}
@@ -911,7 +912,7 @@ const MyTrainings: React.FC = () => {
             Completed
           </button>
         </div>
-      </header>
+      </PageHeader>
 
       {loading ? (
         <div className={styles.loading}>Loading your trainings...</div>

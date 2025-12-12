@@ -37,7 +37,7 @@ export const login = async (
       ? String((user.tenantId as any)._id || user.tenantId)
       : String(user.tenantId);
 
-    // Generate JWT token
+    // Generate JWT token with expiry
     const token = jwt.sign(
       {
         id: String(user._id),
@@ -45,7 +45,8 @@ export const login = async (
         tenantId: tenantIdString,
         role: user.role,
       },
-      process.env.JWT_SECRET || 'your_jwt_secret_key'
+      process.env.JWT_SECRET || 'your_jwt_secret_key',
+      { expiresIn: process.env.JWT_EXPIRES_IN || '7d' } as SignOptions
     );
 
     // Fetch tenant info for branding

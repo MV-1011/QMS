@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { BookOpen } from 'lucide-react';
 import { apiService } from '../../services/api';
+import PageHeader from '../../components/PageHeader';
 import styles from './TrainingList.module.css';
 
 interface TrainingContent {
@@ -76,7 +78,11 @@ interface Assignment {
   createdAt: string;
 }
 
-const TrainingList: React.FC = () => {
+interface TrainingListProps {
+  readOnly?: boolean;
+}
+
+const TrainingList: React.FC<TrainingListProps> = ({ readOnly = false }) => {
   const [trainings, setTrainings] = useState<Training[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -499,12 +505,13 @@ const TrainingList: React.FC = () => {
 
   return (
     <div className={styles.container}>
-      <header className={styles.header}>
-        <h1>Training Management</h1>
-        <button className={styles.primaryBtn} onClick={() => { setShowForm(true); setEditingTraining(null); resetForm(); }}>
-          + Create Training
-        </button>
-      </header>
+      <PageHeader icon={<BookOpen size={24} />} title="Training Management">
+        {!readOnly && (
+          <button className={styles.primaryBtn} onClick={() => { setShowForm(true); setEditingTraining(null); resetForm(); }}>
+            + Create Training
+          </button>
+        )}
+      </PageHeader>
 
       {error && <div className={styles.error}>{error} <button onClick={() => setError('')}>×</button></div>}
 
@@ -1163,12 +1170,16 @@ const TrainingList: React.FC = () => {
                   </td>
                   <td>{new Date(training.dueDate).toLocaleDateString()}</td>
                   <td className={styles.actions}>
-                    <button className={styles.viewBtn} onClick={() => handleViewTraining(training)}>Manage</button>
-                    <button className={styles.editBtn} onClick={() => handleEdit(training)}>Edit</button>
-                    {training.status === 'draft' && (
-                      <button className={styles.statusBtn} onClick={() => handleStatusChange(training, 'published')}>Publish</button>
+                    <button className={styles.viewBtn} onClick={() => handleViewTraining(training)}>View</button>
+                    {!readOnly && (
+                      <>
+                        <button className={styles.editBtn} onClick={() => handleEdit(training)}>Edit</button>
+                        {training.status === 'draft' && (
+                          <button className={styles.statusBtn} onClick={() => handleStatusChange(training, 'published')}>Publish</button>
+                        )}
+                        <button className={styles.deleteBtn} onClick={() => handleDelete(training._id)}>Delete</button>
+                      </>
                     )}
-                    <button className={styles.deleteBtn} onClick={() => handleDelete(training._id)}>Delete</button>
                   </td>
                 </tr>
               ))

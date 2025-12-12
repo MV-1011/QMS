@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { Wrench } from 'lucide-react';
 import apiService from '../../services/api';
+import PageHeader from '../../components/PageHeader';
 import styles from './CAPAList.module.css';
 
 interface CAPA {
@@ -79,7 +81,11 @@ const SOURCES = [
   'Other',
 ];
 
-const CAPAList: React.FC = () => {
+interface CAPAListProps {
+  readOnly?: boolean;
+}
+
+const CAPAList: React.FC<CAPAListProps> = ({ readOnly = false }) => {
   const [capas, setCapas] = useState<CAPA[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -427,15 +433,11 @@ const CAPAList: React.FC = () => {
 
   return (
     <div className={styles.container}>
-      <header className={styles.header}>
-        <div>
-          <h1>CAPA Management</h1>
-          <p className={styles.subtitle}>Corrective and Preventive Actions</p>
-        </div>
-        <div className={styles.headerActions}>
+      <PageHeader icon={<Wrench size={24} />} title="CAPA Management" subtitle="Corrective and Preventive Actions">
+        {!readOnly && (
           <button className={styles.primaryBtn} onClick={handleCreate}>+ New CAPA</button>
-        </div>
-      </header>
+        )}
+      </PageHeader>
 
       {error && <div className={styles.error}>{error}</div>}
 
@@ -538,18 +540,22 @@ const CAPAList: React.FC = () => {
                         >
                           👁️
                         </button>
-                        <button
-                          className={styles.viewBtn}
-                          onClick={() => handleEdit(capa)}
-                        >
-                          ✏️
-                        </button>
-                        <button
-                          className={styles.viewBtn}
-                          onClick={() => handleDelete(capa._id)}
-                        >
-                          🗑️
-                        </button>
+                        {!readOnly && (
+                          <>
+                            <button
+                              className={styles.viewBtn}
+                              onClick={() => handleEdit(capa)}
+                            >
+                              ✏️
+                            </button>
+                            <button
+                              className={styles.viewBtn}
+                              onClick={() => handleDelete(capa._id)}
+                            >
+                              🗑️
+                            </button>
+                          </>
+                        )}
                       </div>
                     </td>
                   </tr>
@@ -560,9 +566,11 @@ const CAPAList: React.FC = () => {
             {capas.length === 0 && (
               <div className={styles.emptyState}>
                 <p>No CAPAs found</p>
-                <button className={styles.primaryBtn} onClick={handleCreate}>
-                  Create your first CAPA
-                </button>
+                {!readOnly && (
+                  <button className={styles.primaryBtn} onClick={handleCreate}>
+                    Create your first CAPA
+                  </button>
+                )}
               </div>
             )}
           </div>
@@ -572,10 +580,12 @@ const CAPAList: React.FC = () => {
               <button className={styles.backBtn} onClick={() => setSelectedCAPA(null)}>
                 ← Back to List
               </button>
-              <div className={styles.detailActions}>
-                <button className={styles.editBtn} onClick={() => handleEdit(selectedCAPA)}>Edit</button>
-                <button className={styles.deleteBtn} onClick={() => handleDelete(selectedCAPA._id)}>Delete</button>
-              </div>
+              {!readOnly && (
+                <div className={styles.detailActions}>
+                  <button className={styles.editBtn} onClick={() => handleEdit(selectedCAPA)}>Edit</button>
+                  <button className={styles.deleteBtn} onClick={() => handleDelete(selectedCAPA._id)}>Delete</button>
+                </div>
+              )}
             </div>
 
             <div className={styles.detailContent}>
@@ -649,21 +659,23 @@ const CAPAList: React.FC = () => {
                 </div>
               )}
 
-              <div className={styles.statusSection}>
-                <h3>Update Status</h3>
-                <div className={styles.statusButtons}>
-                  {['open', 'in_progress', 'pending_approval', 'approved', 'implementation', 'effectiveness_check', 'completed', 'closed'].map(status => (
-                    <button
-                      key={status}
-                      className={`${styles.statusBtn} ${selectedCAPA.status === status ? styles.statusBtnActive : ''}`}
-                      onClick={() => handleStatusChange(selectedCAPA, status)}
-                      disabled={selectedCAPA.status === status}
-                    >
-                      {status.replace(/_/g, ' ')}
+              {!readOnly && (
+                <div className={styles.statusSection}>
+                  <h3>Update Status</h3>
+                  <div className={styles.statusButtons}>
+                    {['open', 'in_progress', 'pending_approval', 'approved', 'implementation', 'effectiveness_check', 'completed', 'closed'].map(status => (
+                      <button
+                        key={status}
+                        className={`${styles.statusBtn} ${selectedCAPA.status === status ? styles.statusBtnActive : ''}`}
+                        onClick={() => handleStatusChange(selectedCAPA, status)}
+                        disabled={selectedCAPA.status === status}
+                      >
+                        {status.replace(/_/g, ' ')}
                     </button>
-                  ))}
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
 
               {selectedCAPA.actionPlan && Array.isArray(selectedCAPA.actionPlan) && selectedCAPA.actionPlan.length > 0 && (
                 <div className={styles.detailSection}>

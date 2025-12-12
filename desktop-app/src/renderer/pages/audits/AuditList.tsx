@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { ClipboardCheck } from 'lucide-react';
 import apiService from '../../services/api';
+import PageHeader from '../../components/PageHeader';
 import styles from './AuditList.module.css';
 
 interface Audit {
@@ -78,7 +80,11 @@ const AUDIT_TYPES = [
   'Self-Inspection',
 ];
 
-const AuditList: React.FC = () => {
+interface AuditListProps {
+  readOnly?: boolean;
+}
+
+const AuditList: React.FC<AuditListProps> = ({ readOnly = false }) => {
   const [audits, setAudits] = useState<Audit[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -446,15 +452,11 @@ const AuditList: React.FC = () => {
 
   return (
     <div className={styles.container}>
-      <header className={styles.header}>
-        <div>
-          <h1>Audit Management</h1>
-          <p className={styles.subtitle}>Internal, External, Regulatory, and Supplier Audits</p>
-        </div>
-        <div className={styles.headerActions}>
+      <PageHeader icon={<ClipboardCheck size={24} />} title="Audit Management" subtitle="Internal, External, Regulatory, and Supplier Audits">
+        {!readOnly && (
           <button className={styles.primaryBtn} onClick={handleCreate}>+ New Audit</button>
-        </div>
-      </header>
+        )}
+      </PageHeader>
 
       {error && <div className={styles.error}>{error}</div>}
 
@@ -573,18 +575,22 @@ const AuditList: React.FC = () => {
                         >
                           👁️
                         </button>
-                        <button
-                          className={styles.viewBtn}
-                          onClick={() => handleEdit(audit)}
-                        >
-                          ✏️
-                        </button>
-                        <button
-                          className={styles.viewBtn}
-                          onClick={() => handleDelete(audit._id)}
-                        >
-                          🗑️
-                        </button>
+                        {!readOnly && (
+                          <>
+                            <button
+                              className={styles.viewBtn}
+                              onClick={() => handleEdit(audit)}
+                            >
+                              ✏️
+                            </button>
+                            <button
+                              className={styles.viewBtn}
+                              onClick={() => handleDelete(audit._id)}
+                            >
+                              🗑️
+                            </button>
+                          </>
+                        )}
                       </div>
                     </td>
                   </tr>
@@ -595,9 +601,11 @@ const AuditList: React.FC = () => {
             {audits.length === 0 && (
               <div className={styles.emptyState}>
                 <p>No audits found</p>
-                <button className={styles.primaryBtn} onClick={handleCreate}>
-                  Schedule your first audit
-                </button>
+                {!readOnly && (
+                  <button className={styles.primaryBtn} onClick={handleCreate}>
+                    Schedule your first audit
+                  </button>
+                )}
               </div>
             )}
           </div>
@@ -607,10 +615,12 @@ const AuditList: React.FC = () => {
               <button className={styles.backBtn} onClick={() => setSelectedAudit(null)}>
                 ← Back to List
               </button>
-              <div className={styles.detailActions}>
-                <button className={styles.editBtn} onClick={() => handleEdit(selectedAudit)}>Edit</button>
-                <button className={styles.deleteBtn} onClick={() => handleDelete(selectedAudit._id)}>Delete</button>
-              </div>
+              {!readOnly && (
+                <div className={styles.detailActions}>
+                  <button className={styles.editBtn} onClick={() => handleEdit(selectedAudit)}>Edit</button>
+                  <button className={styles.deleteBtn} onClick={() => handleDelete(selectedAudit._id)}>Delete</button>
+                </div>
+              )}
             </div>
 
             <div className={styles.detailContent}>
@@ -696,21 +706,23 @@ const AuditList: React.FC = () => {
                 </div>
               </div>
 
-              <div className={styles.statusSection}>
-                <h3>Update Status</h3>
-                <div className={styles.statusButtons}>
-                  {['planned', 'in_progress', 'report_draft', 'report_review', 'completed', 'closed'].map(status => (
-                    <button
-                      key={status}
-                      className={`${styles.statusBtn} ${selectedAudit.status === status ? styles.statusBtnActive : ''}`}
-                      onClick={() => handleStatusChange(selectedAudit, status)}
-                      disabled={selectedAudit.status === status}
-                    >
-                      {status.replace(/_/g, ' ')}
-                    </button>
-                  ))}
+              {!readOnly && (
+                <div className={styles.statusSection}>
+                  <h3>Update Status</h3>
+                  <div className={styles.statusButtons}>
+                    {['planned', 'in_progress', 'report_draft', 'report_review', 'completed', 'closed'].map(status => (
+                      <button
+                        key={status}
+                        className={`${styles.statusBtn} ${selectedAudit.status === status ? styles.statusBtnActive : ''}`}
+                        onClick={() => handleStatusChange(selectedAudit, status)}
+                        disabled={selectedAudit.status === status}
+                      >
+                        {status.replace(/_/g, ' ')}
+                      </button>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
 
               {selectedAudit.leadAuditor && (
                 <div className={styles.detailSection}>

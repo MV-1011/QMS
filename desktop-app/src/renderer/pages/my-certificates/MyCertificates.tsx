@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { Award } from 'lucide-react';
 import apiService from '../../services/api';
+import PageHeader from '../../components/PageHeader';
 import styles from './MyCertificates.module.css';
 
 interface Certificate {
@@ -82,10 +84,9 @@ const MyCertificates: React.FC = () => {
 
   return (
     <div className={styles.container}>
-      <header className={styles.header}>
-        <h1>My Certificates</h1>
+      <PageHeader icon={<Award size={24} />} title="My Certificates">
         <span className={styles.count}>{certificates.length} certificates</span>
-      </header>
+      </PageHeader>
 
       {loading ? (
         <div className={styles.loading}>Loading certificates...</div>

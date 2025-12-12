@@ -1,6 +1,8 @@
 import { app, BrowserWindow, ipcMain } from 'electron';
-import path from 'path';
 import Store from 'electron-store';
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const path = require('path');
 import { autoUpdater } from 'electron-updater';
 
 const store = new Store();
@@ -24,7 +26,7 @@ function createWindow() {
 
   // Load the app
   if (process.env.NODE_ENV === 'development') {
-    mainWindow.loadURL('http://localhost:3000');
+    mainWindow.loadURL('http://localhost:3006');
     mainWindow.webContents.openDevTools();
   } else {
     mainWindow.loadFile(path.join(__dirname, '../renderer/index.html'));

@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { BarChart3 } from 'lucide-react';
 import { apiService } from '../../services/api';
+import PageHeader from '../../components/PageHeader';
 import styles from './ReportsDashboard.module.css';
 
 interface DashboardStats {
@@ -69,91 +71,128 @@ const ReportsDashboard: React.FC = () => {
     return '#e74c3c';
   };
 
+  // Pure SVG Donut Chart component
+  const DonutChart: React.FC<{
+    percentage: number;
+    completed: number;
+    total: number;
+    label: string;
+    completedLabel: string;
+  }> = ({ percentage, completed, total, label, completedLabel }) => {
+    const color = getScoreColor(percentage);
+    const remaining = total - completed;
+
+    // SVG donut chart calculations
+    const size = 120;
+    const strokeWidth = 12;
+    const radius = (size - strokeWidth) / 2;
+    const circumference = 2 * Math.PI * radius;
+    const strokeDasharray = circumference;
+    const strokeDashoffset = circumference - (percentage / 100) * circumference;
+
+    return (
+      <div className={styles.pieChartCard}>
+        <h3 className={styles.pieChartLabel}>{label}</h3>
+        <div className={styles.pieChartContainer}>
+          <svg width={size} height={size} className={styles.donutSvg}>
+            {/* Background circle */}
+            <circle
+              cx={size / 2}
+              cy={size / 2}
+              r={radius}
+              fill="none"
+              stroke="#e5e7eb"
+              strokeWidth={strokeWidth}
+            />
+            {/* Progress circle */}
+            <circle
+              cx={size / 2}
+              cy={size / 2}
+              r={radius}
+              fill="none"
+              stroke={color}
+              strokeWidth={strokeWidth}
+              strokeDasharray={strokeDasharray}
+              strokeDashoffset={strokeDashoffset}
+              strokeLinecap="round"
+              transform={`rotate(-90 ${size / 2} ${size / 2})`}
+              style={{ transition: 'stroke-dashoffset 0.5s ease' }}
+            />
+          </svg>
+          <div className={styles.pieChartCenter}>
+            <span className={styles.pieChartPercentage} style={{ color }}>
+              {percentage}%
+            </span>
+          </div>
+        </div>
+        <div className={styles.pieChartDetail}>
+          {completed} / {total} {completedLabel}
+        </div>
+        <div className={styles.pieChartLegend}>
+          <div className={styles.legendItem}>
+            <span className={styles.legendDot} style={{ backgroundColor: color }}></span>
+            <span>{completedLabel.charAt(0).toUpperCase() + completedLabel.slice(1)}: {completed}</span>
+          </div>
+          <div className={styles.legendItem}>
+            <span className={styles.legendDot} style={{ backgroundColor: '#e5e7eb' }}></span>
+            <span>Remaining: {remaining}</span>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   if (loading) return <div className={styles.loading}>Loading reports...</div>;
   if (error) return <div className={styles.error}>{error}</div>;
   if (!stats || !compliance) return <div className={styles.error}>No data available</div>;
 
   return (
     <div className={styles.container}>
-      <header className={styles.header}>
-        <h1>Reports & Analytics</h1>
+      <PageHeader icon={<BarChart3 size={24} />} title="Reports & Analytics">
         <button className={styles.refreshBtn} onClick={fetchData}>
           Refresh Data
         </button>
-      </header>
+      </PageHeader>
 
       {/* Compliance Score */}
       <section className={styles.complianceSection}>
         <h2>Compliance Overview</h2>
-        <div className={styles.scoreCard}>
-          <div className={styles.mainScore} style={{ borderColor: getScoreColor(compliance.overallScore) }}>
-            <span className={styles.scoreValue} style={{ color: getScoreColor(compliance.overallScore) }}>
-              {compliance.overallScore}%
-            </span>
-            <span className={styles.scoreLabel}>Overall Compliance Score</span>
-          </div>
-          <div className={styles.metricsGrid}>
-            <div className={styles.metricCard}>
-              <div className={styles.metricHeader}>
-                <span>Deviation Closure</span>
-                <span style={{ color: getScoreColor(compliance.metrics.deviations.rate) }}>
-                  {compliance.metrics.deviations.rate}%
-                </span>
-              </div>
-              <div className={styles.progressBar}>
-                <div
-                  className={styles.progressFill}
-                  style={{ width: `${compliance.metrics.deviations.rate}%`, backgroundColor: getScoreColor(compliance.metrics.deviations.rate) }}
-                />
-              </div>
-              <span className={styles.metricDetail}>{compliance.metrics.deviations.closed} / {compliance.metrics.deviations.total} closed</span>
-            </div>
-            <div className={styles.metricCard}>
-              <div className={styles.metricHeader}>
-                <span>CAPA Closure</span>
-                <span style={{ color: getScoreColor(compliance.metrics.capas.rate) }}>
-                  {compliance.metrics.capas.rate}%
-                </span>
-              </div>
-              <div className={styles.progressBar}>
-                <div
-                  className={styles.progressFill}
-                  style={{ width: `${compliance.metrics.capas.rate}%`, backgroundColor: getScoreColor(compliance.metrics.capas.rate) }}
-                />
-              </div>
-              <span className={styles.metricDetail}>{compliance.metrics.capas.closed} / {compliance.metrics.capas.total} closed</span>
-            </div>
-            <div className={styles.metricCard}>
-              <div className={styles.metricHeader}>
-                <span>Training Completion</span>
-                <span style={{ color: getScoreColor(compliance.metrics.trainings.rate) }}>
-                  {compliance.metrics.trainings.rate}%
-                </span>
-              </div>
-              <div className={styles.progressBar}>
-                <div
-                  className={styles.progressFill}
-                  style={{ width: `${compliance.metrics.trainings.rate}%`, backgroundColor: getScoreColor(compliance.metrics.trainings.rate) }}
-                />
-              </div>
-              <span className={styles.metricDetail}>{compliance.metrics.trainings.completed} / {compliance.metrics.trainings.total} completed</span>
-            </div>
-            <div className={styles.metricCard}>
-              <div className={styles.metricHeader}>
-                <span>Audit Completion</span>
-                <span style={{ color: getScoreColor(compliance.metrics.audits.rate) }}>
-                  {compliance.metrics.audits.rate}%
-                </span>
-              </div>
-              <div className={styles.progressBar}>
-                <div
-                  className={styles.progressFill}
-                  style={{ width: `${compliance.metrics.audits.rate}%`, backgroundColor: getScoreColor(compliance.metrics.audits.rate) }}
-                />
-              </div>
-              <span className={styles.metricDetail}>{compliance.metrics.audits.completed} / {compliance.metrics.audits.total} completed</span>
-            </div>
-          </div>
+        <div className={styles.pieChartsGrid}>
+          <DonutChart
+            percentage={compliance.overallScore}
+            completed={Math.round(compliance.overallScore)}
+            total={100}
+            label="Overall Compliance Score"
+            completedLabel="score"
+          />
+          <DonutChart
+            percentage={compliance.metrics.deviations.rate}
+            completed={compliance.metrics.deviations.closed}
+            total={compliance.metrics.deviations.total}
+            label="Deviation Closure"
+            completedLabel="closed"
+          />
+          <DonutChart
+            percentage={compliance.metrics.capas.rate}
+            completed={compliance.metrics.capas.closed}
+            total={compliance.metrics.capas.total}
+            label="CAPA Closure"
+            completedLabel="closed"
+          />
+          <DonutChart
+            percentage={compliance.metrics.trainings.rate}
+            completed={compliance.metrics.trainings.completed}
+            total={compliance.metrics.trainings.total}
+            label="Training Completion"
+            completedLabel="completed"
+          />
+          <DonutChart
+            percentage={compliance.metrics.audits.rate}
+            completed={compliance.metrics.audits.completed}
+            total={compliance.metrics.audits.total}
+            label="Audit Completion"
+            completedLabel="completed"
+          />
         </div>
       </section>
 

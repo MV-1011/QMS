@@ -140,6 +140,38 @@
   cursor: not-allowed;
 }
 
+/* Password Wrapper */
+.passwordWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.passwordWrapper input {
+  width: 100%;
+  padding-right: 44px;
+}
+
+.showPasswordBtn {
+  position: absolute;
+  right: 8px;
+  background: none;
+  border: none;
+  padding: var(--space-2);
+  cursor: pointer;
+  color: var(--text-tertiary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
+}
+
+.showPasswordBtn:hover {
+  color: var(--primary-600);
+  background: var(--primary-50);
+}
+
 /* Error Message */
 .error {
   padding: var(--space-3) var(--space-4);

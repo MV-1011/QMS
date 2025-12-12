@@ -1,6 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { AlertTriangle } from 'lucide-react';
 import { apiService } from '../../services/api';
+import { useAuth } from '../../services/AuthContext';
+import PageHeader from '../../components/PageHeader';
 import styles from './DeviationList.module.css';
+
+// Roles that have full edit access
+const fullAccessRoles = ['admin', 'qa_manager'];
 
 interface Deviation {
   _id: string;
@@ -66,6 +72,7 @@ const CATEGORIES = [
 ];
 
 const DeviationList: React.FC = () => {
+  const { user } = useAuth();
   const [deviations, setDeviations] = useState<Deviation[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -79,6 +86,10 @@ const DeviationList: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState('');
   const [severityFilter, setSeverityFilter] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
+
+  // Check if current user has full access (can edit, delete, change status)
+  const userRole = user?.role || 'trainee';
+  const hasFullAccess = fullAccessRoles.includes(userRole);
 
   useEffect(() => {
     loadDeviations();
@@ -378,14 +389,16 @@ const DeviationList: React.FC = () => {
             ← Back to List
           </button>
           <h2>{selectedDev.deviationNumber}</h2>
-          <div className={styles.detailsActions}>
-            <button className={styles.btnSecondary} onClick={() => handleEdit(selectedDev)}>
-              Edit
-            </button>
-            <button className={styles.btnDanger} onClick={() => handleDelete(selectedDev._id)}>
-              Delete
-            </button>
-          </div>
+          {hasFullAccess && (
+            <div className={styles.detailsActions}>
+              <button className={styles.btnSecondary} onClick={() => handleEdit(selectedDev)}>
+                Edit
+              </button>
+              <button className={styles.btnDanger} onClick={() => handleDelete(selectedDev._id)}>
+                Delete
+              </button>
+            </div>
+          )}
         </div>
 
         <div className={styles.detailsCard}>
@@ -465,21 +478,23 @@ const DeviationList: React.FC = () => {
             </div>
           </div>
 
-          <div className={styles.statusSection}>
-            <h4>Update Status</h4>
-            <div className={styles.statusButtons}>
-              {['open', 'investigation', 'capa_required', 'capa_in_progress', 'pending_closure', 'closed'].map(status => (
-                <button
-                  key={status}
-                  className={`${styles.statusBtn} ${selectedDev.status === status ? styles.statusBtnActive : ''}`}
-                  onClick={() => handleStatusChange(selectedDev, status)}
-                  disabled={selectedDev.status === status}
-                >
-                  {status.replace('_', ' ')}
-                </button>
-              ))}
+          {hasFullAccess && (
+            <div className={styles.statusSection}>
+              <h4>Update Status</h4>
+              <div className={styles.statusButtons}>
+                {['open', 'investigation', 'capa_required', 'capa_in_progress', 'pending_closure', 'closed'].map(status => (
+                  <button
+                    key={status}
+                    className={`${styles.statusBtn} ${selectedDev.status === status ? styles.statusBtnActive : ''}`}
+                    onClick={() => handleStatusChange(selectedDev, status)}
+                    disabled={selectedDev.status === status}
+                  >
+                    {status.replace('_', ' ')}
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
     );
@@ -488,15 +503,11 @@ const DeviationList: React.FC = () => {
   // List view
   return (
     <div className={styles.container}>
-      <div className={styles.header}>
-        <div className={styles.headerLeft}>
-          <h2>Deviations</h2>
-          <p className={styles.subtitle}>Track and investigate quality deviations and non-conformances</p>
-        </div>
+      <PageHeader icon={<AlertTriangle size={24} />} title="Deviations" subtitle="Track and investigate quality deviations and non-conformances">
         <button className={styles.btnPrimary} onClick={handleCreate}>
           + Report Deviation
         </button>
-      </div>
+      </PageHeader>
 
       <div className={styles.filters}>
         <div className={styles.searchBox}>
@@ -626,20 +637,24 @@ const DeviationList: React.FC = () => {
                           >
                             👁️
                           </button>
-                          <button
-                            className={styles.btnAction}
-                            onClick={() => handleEdit(dev)}
-                            title="Edit"
-                          >
-                            ✏️
-                          </button>
-                          <button
-                            className={styles.btnAction}
-                            onClick={() => handleDelete(dev._id)}
-                            title="Delete"
-                          >
-                            🗑️
-                          </button>
+                          {hasFullAccess && (
+                            <>
+                              <button
+                                className={styles.btnAction}
+                                onClick={() => handleEdit(dev)}
+                                title="Edit"
+                              >
+                                ✏️
+                              </button>
+                              <button
+                                className={styles.btnAction}
+                                onClick={() => handleDelete(dev._id)}
+                                title="Delete"
+                              >
+                                🗑️
+                              </button>
+                            </>
+                          )}
                         </div>
                       </td>
                     </tr>

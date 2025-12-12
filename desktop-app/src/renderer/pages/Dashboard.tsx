@@ -1,4 +1,20 @@
 import React, { useState, useEffect } from 'react';
+import {
+  Home,
+  GraduationCap,
+  Award,
+  Bell,
+  FileText,
+  RefreshCw,
+  AlertTriangle,
+  Wrench,
+  ClipboardCheck,
+  BookOpen,
+  BarChart3,
+  Menu,
+  X,
+  LogOut,
+} from 'lucide-react';
 import { useAuth } from '../services/AuthContext';
 import { NavigationProvider, useNavigation } from '../services/NavigationContext';
 import apiService from '../services/api';
@@ -22,18 +38,25 @@ interface TrainingStats {
   overdue: number;
 }
 
-// Role-based permissions
+// Role-based permissions - modules each role can access
 const rolePermissions: Record<string, string[]> = {
   admin: ['dashboard', 'documents', 'change-control', 'deviations', 'capa', 'audits', 'training', 'reports', 'users', 'my-trainings', 'notifications', 'certificates'],
   qa_manager: ['dashboard', 'documents', 'change-control', 'deviations', 'capa', 'audits', 'training', 'reports', 'my-trainings', 'notifications', 'certificates'],
-  pharmacist: ['dashboard', 'documents', 'reports', 'my-trainings', 'notifications', 'certificates'],
-  technician: ['dashboard', 'my-trainings', 'notifications', 'certificates'],
-  trainee: ['dashboard', 'my-trainings', 'notifications', 'certificates'],
+  pharmacist: ['dashboard', 'documents', 'change-control', 'deviations', 'capa', 'audits', 'training', 'reports', 'my-trainings', 'notifications', 'certificates'],
+  technician: ['dashboard', 'documents', 'change-control', 'deviations', 'capa', 'audits', 'training', 'reports', 'my-trainings', 'notifications', 'certificates'],
+  trainee: ['dashboard', 'documents', 'change-control', 'deviations', 'capa', 'audits', 'training', 'reports', 'my-trainings', 'notifications', 'certificates'],
 };
+
+// Roles that have full edit access (not read-only)
+const fullAccessRoles = ['admin', 'qa_manager'];
+
+// Check if user can edit (has full access)
+const canEdit = (role: string) => fullAccessRoles.includes(role);
 
 const DashboardContent: React.FC = () => {
   const { user, tenant, logout } = useAuth();
   const { activeModule, navigateTo } = useNavigation();
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [unreadNotifications, setUnreadNotifications] = useState(0);
   const [trainingStats, setTrainingStats] = useState<TrainingStats>({
     total: 0,
@@ -110,17 +133,17 @@ const DashboardContent: React.FC = () => {
   const allowedModules = rolePermissions[userRole] || rolePermissions.trainee;
 
   const allModules = [
-    { id: 'dashboard', name: 'Dashboard', icon: '🏠' },
-    { id: 'my-trainings', name: 'My Trainings', icon: '📖' },
-    { id: 'certificates', name: 'My Certificates', icon: '🎓' },
-    { id: 'notifications', name: 'Notifications', icon: '🔔', badge: unreadNotifications },
-    { id: 'documents', name: 'Document Control', icon: '📄' },
-    { id: 'change-control', name: 'Change Control', icon: '🔄' },
-    { id: 'deviations', name: 'Deviations', icon: '⚠️' },
-    { id: 'capa', name: 'CAPA', icon: '🔧' },
-    { id: 'audits', name: 'Audits', icon: '🔍' },
-    { id: 'training', name: 'Training Management', icon: '📚' },
-    { id: 'reports', name: 'Reports', icon: '📊' },
+    { id: 'dashboard', name: 'Dashboard', icon: <Home size={18} /> },
+    { id: 'my-trainings', name: 'My Trainings', icon: <GraduationCap size={18} /> },
+    { id: 'certificates', name: 'My Certificates', icon: <Award size={18} /> },
+    { id: 'notifications', name: 'Notifications', icon: <Bell size={18} />, badge: unreadNotifications },
+    { id: 'documents', name: 'Document Control', icon: <FileText size={18} /> },
+    { id: 'change-control', name: 'Change Control', icon: <RefreshCw size={18} /> },
+    { id: 'deviations', name: 'Deviations', icon: <AlertTriangle size={18} /> },
+    { id: 'capa', name: 'CAPA', icon: <Wrench size={18} /> },
+    { id: 'audits', name: 'Audits', icon: <ClipboardCheck size={18} /> },
+    { id: 'training', name: 'Training Management', icon: <BookOpen size={18} /> },
+    { id: 'reports', name: 'Reports', icon: <BarChart3 size={18} /> },
   ];
 
   const modules = allModules.filter(m => allowedModules.includes(m.id));
@@ -149,12 +172,21 @@ const DashboardContent: React.FC = () => {
 
   return (
     <div className={styles.dashboard}>
-      <aside className={styles.sidebar}>
+      <aside className={`${styles.sidebar} ${sidebarCollapsed ? styles.collapsed : ''}`}>
         <div className={styles.sidebarHeader}>
-          {tenant?.branding?.logo ? (
-            <img src={tenant.branding.logo} alt={tenant.name} className={styles.logo} />
-          ) : (
-            <h2>{tenant?.name || 'QMS'}</h2>
+          <button
+            className={styles.hamburgerBtn}
+            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+            title={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          >
+            {sidebarCollapsed ? <Menu size={20} /> : <X size={20} />}
+          </button>
+          {!sidebarCollapsed && (
+            tenant?.branding?.logo ? (
+              <img src={tenant.branding.logo} alt={tenant.name} className={styles.logo} />
+            ) : (
+              <h2>{tenant?.name || 'QMS'}</h2>
+            )
           )}
         </div>
 
@@ -166,28 +198,34 @@ const DashboardContent: React.FC = () => {
                 activeModule === module.id ? styles.active : ''
               }`}
               onClick={() => navigateTo(module.id)}
+              title={sidebarCollapsed ? module.name : undefined}
             >
               <span className={styles.icon}>{module.icon}</span>
-              <span>{module.name}</span>
-              {module.badge ? (
+              {!sidebarCollapsed && <span>{module.name}</span>}
+              {!sidebarCollapsed && module.badge ? (
                 <span className={styles.navBadge}>{module.badge}</span>
+              ) : null}
+              {sidebarCollapsed && module.badge ? (
+                <span className={styles.collapsedBadge}>{module.badge}</span>
               ) : null}
             </button>
           ))}
         </nav>
 
         <div className={styles.sidebarFooter}>
-          <div className={styles.userInfo}>
-            <p className={styles.userName}>{user?.name}</p>
-            <p
-              className={styles.userRole}
-              style={{ color: getRoleBadgeColor(userRole) }}
-            >
-              {getRoleDisplayName(userRole)}
-            </p>
-          </div>
-          <button className={styles.logoutBtn} onClick={logout}>
-            Logout
+          {!sidebarCollapsed && (
+            <div className={styles.userInfo}>
+              <p className={styles.userName}>{user?.name}</p>
+              <p
+                className={styles.userRole}
+                style={{ color: getRoleBadgeColor(userRole) }}
+              >
+                {getRoleDisplayName(userRole)}
+              </p>
+            </div>
+          )}
+          <button className={styles.logoutBtn} onClick={logout} title={sidebarCollapsed ? 'Logout' : undefined}>
+            {sidebarCollapsed ? <LogOut size={16} /> : 'Logout'}
           </button>
         </div>
       </aside>
@@ -205,65 +243,10 @@ const DashboardContent: React.FC = () => {
               </div>
             </div>
 
-            {/* Training Progress Section */}
-            {!loadingStats && trainingStats.total > 0 && (
-              <div className={styles.trainingProgressSection}>
-                <h2>Training Progress</h2>
-                <div className={styles.trainingProgressContent}>
-                  <div className={styles.progressCircle}>
-                    <svg viewBox="0 0 36 36" className={styles.circularChart}>
-                      <path
-                        className={styles.circleBg}
-                        d="M18 2.0845
-                          a 15.9155 15.9155 0 0 1 0 31.831
-                          a 15.9155 15.9155 0 0 1 0 -31.831"
-                      />
-                      <path
-                        className={styles.circle}
-                        strokeDasharray={`${(trainingStats.completed / trainingStats.total) * 100}, 100`}
-                        d="M18 2.0845
-                          a 15.9155 15.9155 0 0 1 0 31.831
-                          a 15.9155 15.9155 0 0 1 0 -31.831"
-                      />
-                    </svg>
-                    <div className={styles.progressPercentage}>
-                      {Math.round((trainingStats.completed / trainingStats.total) * 100)}%
-                    </div>
-                  </div>
-                  <div className={styles.progressStats}>
-                    <div className={styles.progressStatItem}>
-                      <span className={styles.progressStatValue}>{trainingStats.completed}</span>
-                      <span className={styles.progressStatLabel}>Completed</span>
-                    </div>
-                    <div className={styles.progressStatItem}>
-                      <span className={`${styles.progressStatValue} ${styles.inProgress}`}>{trainingStats.inProgress}</span>
-                      <span className={styles.progressStatLabel}>In Progress</span>
-                    </div>
-                    <div className={styles.progressStatItem}>
-                      <span className={styles.progressStatValue}>{trainingStats.pending}</span>
-                      <span className={styles.progressStatLabel}>Pending</span>
-                    </div>
-                    {trainingStats.overdue > 0 && (
-                      <div className={styles.progressStatItem}>
-                        <span className={`${styles.progressStatValue} ${styles.overdue}`}>{trainingStats.overdue}</span>
-                        <span className={styles.progressStatLabel}>Overdue</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-                <button
-                  className={styles.viewAllTrainingsBtn}
-                  onClick={() => navigateTo('my-trainings')}
-                >
-                  View All Trainings
-                </button>
-              </div>
-            )}
-
             <div className={styles.statsGrid}>
               {/* Always show My Trainings for all roles */}
               <div className={styles.statCard} onClick={() => navigateTo('my-trainings')}>
-                <span className={styles.statIcon}>📖</span>
+                <span className={styles.statIcon}><GraduationCap size={28} /></span>
                 <div className={styles.statInfo}>
                   <h3>My Trainings</h3>
                   <p>
@@ -277,7 +260,7 @@ const DashboardContent: React.FC = () => {
 
               {/* Always show Certificates for all roles */}
               <div className={styles.statCard} onClick={() => navigateTo('certificates')}>
-                <span className={styles.statIcon}>🎓</span>
+                <span className={styles.statIcon}><Award size={28} /></span>
                 <div className={styles.statInfo}>
                   <h3>My Certificates</h3>
                   <p>View your earned certificates</p>
@@ -286,7 +269,7 @@ const DashboardContent: React.FC = () => {
 
               {/* Show notifications with badge */}
               <div className={styles.statCard} onClick={() => navigateTo('notifications')}>
-                <span className={styles.statIcon}>🔔</span>
+                <span className={styles.statIcon}><Bell size={28} /></span>
                 <div className={styles.statInfo}>
                   <h3>Notifications {unreadNotifications > 0 && <span className={styles.notifBadge}>{unreadNotifications}</span>}</h3>
                   <p>View your notifications</p>
@@ -296,7 +279,7 @@ const DashboardContent: React.FC = () => {
               {/* Role-based modules */}
               {allowedModules.includes('documents') && (
                 <div className={styles.statCard} onClick={() => navigateTo('documents')}>
-                  <span className={styles.statIcon}>📄</span>
+                  <span className={styles.statIcon}><FileText size={28} /></span>
                   <div className={styles.statInfo}>
                     <h3>Documents</h3>
                     <p>Manage SOPs, Policies & Forms</p>
@@ -306,7 +289,7 @@ const DashboardContent: React.FC = () => {
 
               {allowedModules.includes('change-control') && (
                 <div className={styles.statCard} onClick={() => navigateTo('change-control')}>
-                  <span className={styles.statIcon}>🔄</span>
+                  <span className={styles.statIcon}><RefreshCw size={28} /></span>
                   <div className={styles.statInfo}>
                     <h3>Change Control</h3>
                     <p>Track changes & approvals</p>
@@ -316,7 +299,7 @@ const DashboardContent: React.FC = () => {
 
               {allowedModules.includes('deviations') && (
                 <div className={styles.statCard} onClick={() => navigateTo('deviations')}>
-                  <span className={styles.statIcon}>⚠️</span>
+                  <span className={styles.statIcon}><AlertTriangle size={28} /></span>
                   <div className={styles.statInfo}>
                     <h3>Deviations</h3>
                     <p>Report & resolve deviations</p>
@@ -326,7 +309,7 @@ const DashboardContent: React.FC = () => {
 
               {allowedModules.includes('capa') && (
                 <div className={styles.statCard} onClick={() => navigateTo('capa')}>
-                  <span className={styles.statIcon}>🔧</span>
+                  <span className={styles.statIcon}><Wrench size={28} /></span>
                   <div className={styles.statInfo}>
                     <h3>CAPA</h3>
                     <p>Corrective & preventive actions</p>
@@ -336,7 +319,7 @@ const DashboardContent: React.FC = () => {
 
               {allowedModules.includes('audits') && (
                 <div className={styles.statCard} onClick={() => navigateTo('audits')}>
-                  <span className={styles.statIcon}>🔍</span>
+                  <span className={styles.statIcon}><ClipboardCheck size={28} /></span>
                   <div className={styles.statInfo}>
                     <h3>Audits</h3>
                     <p>Internal & external audits</p>
@@ -346,7 +329,7 @@ const DashboardContent: React.FC = () => {
 
               {allowedModules.includes('training') && (
                 <div className={styles.statCard} onClick={() => navigateTo('training')}>
-                  <span className={styles.statIcon}>📚</span>
+                  <span className={styles.statIcon}><BookOpen size={28} /></span>
                   <div className={styles.statInfo}>
                     <h3>Training Management</h3>
                     <p>Create & assign trainings</p>
@@ -356,17 +339,13 @@ const DashboardContent: React.FC = () => {
 
               {allowedModules.includes('reports') && (
                 <div className={styles.statCard} onClick={() => navigateTo('reports')}>
-                  <span className={styles.statIcon}>📊</span>
+                  <span className={styles.statIcon}><BarChart3 size={28} /></span>
                   <div className={styles.statInfo}>
                     <h3>Reports</h3>
                     <p>Analytics & compliance reports</p>
                   </div>
                 </div>
               )}
-            </div>
-
-            <div className={styles.quickInfo}>
-              <p>Quality Management System for <strong>{tenant?.name || 'Your Pharmacy'}</strong></p>
             </div>
           </div>
         ) : activeModule === 'my-trainings' ? (
@@ -376,17 +355,17 @@ const DashboardContent: React.FC = () => {
         ) : activeModule === 'certificates' ? (
           <MyCertificates />
         ) : activeModule === 'documents' ? (
-          <DocumentsList />
+          <DocumentsList readOnly={!canEdit(userRole)} />
         ) : activeModule === 'change-control' ? (
-          <ChangeControlList />
+          <ChangeControlList readOnly={!canEdit(userRole)} />
         ) : activeModule === 'deviations' ? (
           <DeviationList />
         ) : activeModule === 'capa' ? (
-          <CAPAList />
+          <CAPAList readOnly={!canEdit(userRole)} />
         ) : activeModule === 'audits' ? (
-          <AuditList />
+          <AuditList readOnly={!canEdit(userRole)} />
         ) : activeModule === 'training' ? (
-          <TrainingList />
+          <TrainingList readOnly={!canEdit(userRole)} />
         ) : activeModule === 'reports' ? (
           <ReportsDashboard />
         ) : (

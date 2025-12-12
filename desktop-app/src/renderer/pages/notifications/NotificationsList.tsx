@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import { Bell } from 'lucide-react';
 import apiService from '../../services/api';
 import { useNavigation, NavigationParams } from '../../services/NavigationContext';
+import PageHeader from '../../components/PageHeader';
 import styles from './NotificationsList.module.css';
 
 interface Notification {
@@ -143,19 +145,18 @@ const NotificationsList: React.FC = () => {
 
   return (
     <div className={styles.container}>
-      <header className={styles.header}>
-        <div className={styles.titleArea}>
-          <h1>Notifications</h1>
+      <PageHeader icon={<Bell size={24} />} title="Notifications">
+        <div className={styles.headerActions}>
           {unreadCount > 0 && (
             <span className={styles.badge}>{unreadCount} unread</span>
           )}
+          {unreadCount > 0 && (
+            <button onClick={handleMarkAllAsRead} className={styles.markAllBtn}>
+              Mark all as read
+            </button>
+          )}
         </div>
-        {unreadCount > 0 && (
-          <button onClick={handleMarkAllAsRead} className={styles.markAllBtn}>
-            Mark all as read
-          </button>
-        )}
-      </header>
+      </PageHeader>
 
       {loading ? (
         <div className={styles.loading}>Loading notifications...</div>
